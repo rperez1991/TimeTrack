@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "733903344045",
+    "firebase_url": "https://time-track-883d9.firebaseio.com",
+    "project_id": "time-track-883d9",
+    "storage_bucket": "time-track-883d9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733903344045:android:68be7a1206a338ee",
+        "android_client_info": {
+          "package_name": "com.diraapps.timetrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "733903344045-1f363gh93da367db9n22p0toajtkhge6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMZlZAfFm-HQVS2MYOWmGfix9BqsCoBLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733903344045-1f363gh93da367db9n22p0toajtkhge6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

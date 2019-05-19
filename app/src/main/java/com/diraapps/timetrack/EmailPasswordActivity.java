@@ -22,24 +22,33 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Date;
+import java.util.Iterator;
+
 
 public class EmailPasswordActivity extends BaseActivity implements
         View.OnClickListener {
 
+    private String TAGLOG = "TimeTrack";
+    DatabaseReference dbTracking;
+    ValueEventListener dbListener;
     private static final String TAG = "EmailPassword";
-
-
     private EditText mEmailField;
     private EditText mPasswordField;
+    DatabaseReference ultimoTiempo;
 
     // [START declare_auth]
     private FirebaseAuth mAuth;
@@ -63,6 +72,27 @@ public class EmailPasswordActivity extends BaseActivity implements
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
+
+        findViewById(R.id.enter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                if (dbTracking != null && dbTracking != null) {
+                    ultimoTiempo.child("enter").setValue(new Date());
+                }
+            }
+        });
+        findViewById(R.id.exit).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                if (dbTracking != null && ultimoTiempo != null) {
+                    ultimoTiempo.child("exit").setValue(new Date());
+                    //Creamos un nuevo valor
+                    dbTracking.push();
+                }
+            }
+        });
     }
 
     // [START on_start_check_user]
@@ -71,6 +101,7 @@ public class EmailPasswordActivity extends BaseActivity implements
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateDB(currentUser);
         updateUI(currentUser);
     }
     // [END on_start_check_user]
@@ -92,6 +123,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            updateDB(user);
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -204,22 +236,81 @@ public class EmailPasswordActivity extends BaseActivity implements
         return valid;
     }
 
+    private DataSnapshot ultimoTiempo (DataSnapshot dataSnapshot) {
+        Iterable<DataSnapshot> tiempos = dataSnapshot.getChildren();
+        Iterator<DataSnapshot> itr  = tiempos.iterator();
+        DataSnapshot tiempo = null;
+        while(itr.hasNext()) {
+            tiempo = itr.next();
+        }
+
+        //Guardamos una referencia al último tiempo
+        if (tiempo != null && !tiempo.hasChild("exit")) {
+            this.ultimoTiempo = tiempo.getRef();
+        } else {
+            this.ultimoTiempo = dbTracking.push();
+        }
+        return tiempo;
+    }
+
+    private void actualizarBotonesEntradaSalida(DataSnapshot dataSnapshot) {
+        DataSnapshot ultimoTiempo = ultimoTiempo(dataSnapshot);
+        if (ultimoTiempo != null) {
+            if (ultimoTiempo.child("exit").exists()) {
+                findViewById(R.id.enter).setEnabled(true);
+                findViewById(R.id.exit).setEnabled(false);
+            } else {
+                findViewById(R.id.enter).setEnabled(false);
+                findViewById(R.id.exit).setEnabled(true);
+            }
+        } else {
+            findViewById(R.id.enter).setEnabled(true);
+            findViewById(R.id.exit).setEnabled(false);
+        }
+
+    }
+
+    private void updateDB(final FirebaseUser user) {
+        if (dbTracking != null && dbListener != null) {
+            dbTracking.removeEventListener(dbListener);
+        }
+
+        dbTracking = FirebaseDatabase.getInstance().getReference()
+                        .child("tracking")
+                        .child(user.getUid());
+
+        dbListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                actualizarBotonesEntradaSalida(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAGLOG, "Error!", databaseError.toException());
+            }
+        };
+
+        dbTracking.addValueEventListener(dbListener);
+    }
+
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-
             findViewById(R.id.emailPasswordButtons).setVisibility(View.GONE);
             findViewById(R.id.emailFields).setVisibility(View.GONE);
             findViewById(R.id.passwordFields).setVisibility(View.GONE);
             findViewById(R.id.signedInButtons).setVisibility(View.VISIBLE);
-
             findViewById(R.id.verifyEmailButton).setEnabled(!user.isEmailVerified());
+            findViewById(R.id.enter).setVisibility(View.VISIBLE);
+            findViewById(R.id.exit).setVisibility(View.VISIBLE);
         } else {
-
             findViewById(R.id.emailPasswordButtons).setVisibility(View.VISIBLE);
             findViewById(R.id.emailFields).setVisibility(View.VISIBLE);
             findViewById(R.id.passwordFields).setVisibility(View.VISIBLE);
             findViewById(R.id.signedInButtons).setVisibility(View.GONE);
+            findViewById(R.id.enter).setVisibility(View.GONE);
+            findViewById(R.id.exit).setVisibility(View.GONE);
         }
     }
 

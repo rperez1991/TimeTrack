@@ -101,10 +101,8 @@ public class EmailPasswordActivity extends BaseActivity implements
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null) {
-            updateDB(currentUser);
-            updateUI(currentUser);
-        }
+        updateDB(currentUser);
+        updateUI(currentUser);
     }
     // [END on_start_check_user]
 
@@ -273,27 +271,29 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
 
     private void updateDB(final FirebaseUser user) {
-        if (dbTracking != null && dbListener != null) {
-            dbTracking.removeEventListener(dbListener);
+        if(user != null) {
+            if (dbTracking != null && dbListener != null) {
+                dbTracking.removeEventListener(dbListener);
+            }
+
+            dbTracking = FirebaseDatabase.getInstance().getReference()
+                    .child("tracking")
+                    .child(user.getUid());
+
+            dbListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    actualizarBotonesEntradaSalida(dataSnapshot);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e(TAGLOG, "Error!", databaseError.toException());
+                }
+            };
+
+            dbTracking.addValueEventListener(dbListener);
         }
-
-        dbTracking = FirebaseDatabase.getInstance().getReference()
-                        .child("tracking")
-                        .child(user.getUid());
-
-        dbListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                actualizarBotonesEntradaSalida(dataSnapshot);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAGLOG, "Error!", databaseError.toException());
-            }
-        };
-
-        dbTracking.addValueEventListener(dbListener);
     }
 
     private void updateUI(FirebaseUser user) {

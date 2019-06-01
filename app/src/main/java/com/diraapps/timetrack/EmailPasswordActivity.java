@@ -99,6 +99,8 @@ public class EmailPasswordActivity extends BaseActivity implements
                     ultimoTiempo.child("enter").setValue(new Date());
                     ultimoTiempo.child("coordenadas_enter").child("latitud").setValue(latitude);
                     ultimoTiempo.child("coordenadas_enter").child("longitud").setValue(longitude);
+                    findViewById(R.id.enter).setEnabled(true);
+                    findViewById(R.id.exit).setEnabled(false);
                 }
             }
         });
@@ -121,6 +123,8 @@ public class EmailPasswordActivity extends BaseActivity implements
                     ultimoTiempo.child("coordenadas_exit").child("longitud").setValue(longitude_exit);
                     //Creamos un nuevo valor
                     dbTracking.push();
+                    findViewById(R.id.enter).setEnabled(false);
+                    findViewById(R.id.exit).setEnabled(true);
                 }
             }
         });

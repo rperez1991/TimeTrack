@@ -1,12 +1,12 @@
 /**
  * Copyright 2016 Google Inc. All Rights Reserved.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,11 @@
 
 package com.diraapps.timetrack;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -49,7 +52,7 @@ public class EmailPasswordActivity extends BaseActivity implements
     private EditText mEmailField;
     private EditText mPasswordField;
     DatabaseReference ultimoTiempo;
-
+    private GPSTracker gpsTracker;
     // [START declare_auth]
     private FirebaseAuth mAuth;
     // [END declare_auth]
@@ -66,7 +69,6 @@ public class EmailPasswordActivity extends BaseActivity implements
         // Buttons
         findViewById(R.id.emailSignInButton).setOnClickListener(this);
         findViewById(R.id.signOutButton).setOnClickListener(this);
-        findViewById(R.id.verifyEmailButton).setOnClickListener(this);
 
         // [START initialize_auth]
         // Initialize Firebase Auth
@@ -75,19 +77,48 @@ public class EmailPasswordActivity extends BaseActivity implements
 
         findViewById(R.id.enter).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 if (dbTracking != null && dbTracking != null) {
+
+                    try {
+                        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+                            ActivityCompat.requestPermissions(EmailPasswordActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+                        }
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    double latitude = 0;
+                    double longitude = 0;
+
+                    gpsTracker = new GPSTracker(EmailPasswordActivity.this);
+                    if (gpsTracker.canGetLocation()) {
+                        latitude = gpsTracker.getLatitude();
+                        longitude = gpsTracker.getLongitude();
+                    }
+
                     ultimoTiempo.child("enter").setValue(new Date());
+                    ultimoTiempo.child("coordenadas_enter").child("latitud").setValue(latitude);
+                    ultimoTiempo.child("coordenadas_enter").child("longitud").setValue(longitude);
                 }
             }
         });
         findViewById(R.id.exit).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 if (dbTracking != null && ultimoTiempo != null) {
+
+                    double latitude_exit = 0;
+                    double longitude_exit = 0;
+
+                    gpsTracker = new GPSTracker(EmailPasswordActivity.this);
+                    if (gpsTracker.canGetLocation()) {
+                        latitude_exit = gpsTracker.getLatitude();
+                        longitude_exit = gpsTracker.getLongitude();
+                    }
+
                     ultimoTiempo.child("exit").setValue(new Date());
+                    ultimoTiempo.child("coordenadas_exit").child("latitud").setValue(latitude_exit);
+                    ultimoTiempo.child("coordenadas_exit").child("longitud").setValue(longitude_exit);
                     //Creamos un nuevo valor
                     dbTracking.push();
                 }
@@ -101,7 +132,7 @@ public class EmailPasswordActivity extends BaseActivity implements
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null) {
             updateDB(currentUser);
             updateUI(currentUser);
         }
@@ -130,7 +161,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(EmailPasswordActivity.this, "Authentication failed.",
+                            Toast.makeText(EmailPasswordActivity.this, "Usuario o contraseña incorrectos.",
                                     Toast.LENGTH_SHORT).show();
                             updateUI(null);
                         }
@@ -186,8 +217,6 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
 
     private void sendEmailVerification() {
-        // Disable button
-        findViewById(R.id.verifyEmailButton).setEnabled(false);
 
         // Send verification email
         // [START send_email_verification]
@@ -198,7 +227,6 @@ public class EmailPasswordActivity extends BaseActivity implements
                     public void onComplete(@NonNull Task<Void> task) {
                         // [START_EXCLUDE]
                         // Re-enable button
-                        findViewById(R.id.verifyEmailButton).setEnabled(true);
 
                         if (task.isSuccessful()) {
                             Toast.makeText(EmailPasswordActivity.this,
@@ -227,6 +255,8 @@ public class EmailPasswordActivity extends BaseActivity implements
             mEmailField.setError(null);
         }
 
+        email = email + "@garlez.com";
+
         String password = mPasswordField.getText().toString();
         if (TextUtils.isEmpty(password)) {
             mPasswordField.setError("Required.");
@@ -238,11 +268,11 @@ public class EmailPasswordActivity extends BaseActivity implements
         return valid;
     }
 
-    private DataSnapshot ultimoTiempo (DataSnapshot dataSnapshot) {
+    private DataSnapshot ultimoTiempo(DataSnapshot dataSnapshot) {
         Iterable<DataSnapshot> tiempos = dataSnapshot.getChildren();
-        Iterator<DataSnapshot> itr  = tiempos.iterator();
+        Iterator<DataSnapshot> itr = tiempos.iterator();
         DataSnapshot tiempo = null;
-        while(itr.hasNext()) {
+        while (itr.hasNext()) {
             tiempo = itr.next();
         }
 
@@ -278,8 +308,8 @@ public class EmailPasswordActivity extends BaseActivity implements
         }
 
         dbTracking = FirebaseDatabase.getInstance().getReference()
-                        .child("tracking")
-                        .child(user.getUid());
+                .child("tracking")
+                .child(user.getUid());
 
         dbListener = new ValueEventListener() {
             @Override
@@ -303,7 +333,6 @@ public class EmailPasswordActivity extends BaseActivity implements
             findViewById(R.id.emailFields).setVisibility(View.GONE);
             findViewById(R.id.passwordFields).setVisibility(View.GONE);
             findViewById(R.id.signedInButtons).setVisibility(View.VISIBLE);
-            findViewById(R.id.verifyEmailButton).setEnabled(!user.isEmailVerified());
             findViewById(R.id.enter).setVisibility(View.VISIBLE);
             findViewById(R.id.exit).setVisibility(View.VISIBLE);
         } else {
@@ -320,11 +349,9 @@ public class EmailPasswordActivity extends BaseActivity implements
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.emailSignInButton) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            signIn(mEmailField.getText().toString() + "@garlez.com", mPasswordField.getText().toString());
         } else if (i == R.id.signOutButton) {
             signOut();
-        } else if (i == R.id.verifyEmailButton) {
-            sendEmailVerification();
         }
     }
 }

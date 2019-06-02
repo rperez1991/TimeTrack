@@ -38,6 +38,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-auth:17.0.0'
     implementation "com.google.firebase:firebase-database:17.0.0"
+    implementation 'com.google.firebase:firebase-messaging:18.0.0'
 
 
     // Google Sign In SDK (only required for Google Sign In)
@@ -53,3 +54,4 @@ dependencies {
 
 }
 apply plugin: 'com.google.gms.google-services'
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true

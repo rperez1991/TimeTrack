@@ -10,7 +10,7 @@
     <string name="label_twitter_login">Firebase + Twitter Login</string>
     <string name="desc_twitter_login">Use a Twitter Login credential to authenticate with Firebase.</string>
 
-    <string name="label_emailpassword">Login</string>
+    <string name="label_emailpassword">Transportes Garlez</string>
     <string name="desc_emailpassword">Use an email and password to authenticate with Firebase.</string>
 
     <string name="label_passwordless">Passwordless Authentication</string>
@@ -44,7 +44,7 @@
     <string name="signed_in">Signed In</string>
     <string name="signed_out">Signed Out</string>
     <string name="token_null">Token: null</string>
-    <string name="hint_email">Email</string>
+    <string name="hint_email">DNI</string>
     <string name="hint_password">Contraseña</string>
     <string name="desc_firebase_lockup">Firebase logo and name</string>
     <string name="auth_failed">Authentication failed</string>

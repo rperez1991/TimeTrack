@@ -42,6 +42,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -129,7 +130,8 @@ public class EmailPasswordActivity extends BaseActivity implements
                         longitude = gpsTracker.getLongitude();
                     }
 
-                    ultimoTiempo.child("enter").setValue(new Date());
+                    String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                    ultimoTiempo.child("enter").setValue(date);
                     ultimoTiempo.child("coordenadas_enter").child("latitud").setValue(latitude);
                     ultimoTiempo.child("coordenadas_enter").child("longitud").setValue(longitude);
 
@@ -155,7 +157,8 @@ public class EmailPasswordActivity extends BaseActivity implements
                         longitude_exit = gpsTracker.getLongitude();
                     }
 
-                    ultimoTiempo.child("exit").setValue(new Date());
+                    String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                    ultimoTiempo.child("exit").setValue(date);
                     ultimoTiempo.child("coordenadas_exit").child("latitud").setValue(latitude_exit);
                     ultimoTiempo.child("coordenadas_exit").child("longitud").setValue(longitude_exit);
                     //Creamos un nuevo valor
@@ -353,7 +356,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
         dbTracking = FirebaseDatabase.getInstance().getReference()
                 .child("tracking")
-                .child(user.getUid());
+                .child(user.getEmail().replace( "@garlez.com", "" ));
 
 
 

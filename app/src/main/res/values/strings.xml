@@ -10,7 +10,7 @@
     <string name="label_twitter_login">Firebase + Twitter Login</string>
     <string name="desc_twitter_login">Use a Twitter Login credential to authenticate with Firebase.</string>
 
-    <string name="label_emailpassword">Transportes Garlez</string>
+    <string name="label_emailpassword">Planway logística</string>
     <string name="desc_emailpassword">Use an email and password to authenticate with Firebase.</string>
 
     <string name="label_passwordless">Passwordless Authentication</string>

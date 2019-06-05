@@ -64,13 +64,13 @@ public class EmailPasswordActivity extends BaseActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emailpassword);
 
         // Views
         mEmailField = findViewById(R.id.fieldEmail);
         mPasswordField = findViewById(R.id.fieldPassword);
-
 
         // Buttons
         findViewById(R.id.emailSignInButton).setOnClickListener(this);
@@ -83,6 +83,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
         updateDB(mAuth.getCurrentUser());
         updateUI(mAuth.getCurrentUser());
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
@@ -356,7 +357,7 @@ public class EmailPasswordActivity extends BaseActivity implements
 
         dbTracking = FirebaseDatabase.getInstance().getReference()
                 .child("tracking")
-                .child(user.getEmail().replace( "@garlez.com", "" ));
+                .child(user.getUid() +  " - " + user.getDisplayName());
 
 
 
